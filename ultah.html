@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>buat kamu 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Poppins:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F0F8FF;
+    --blue:#D6E8FF;
+    --blue-deep:#6EA8FF;
+    --lavender:#D9E7F7;
+    --peach:#A4C8FF;
+    --plum:#2E3A50;
+    --gold:#66B2FF;
+    --white:#FFFFFF;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{
+    height:100%;
+    overflow-x:hidden;
+  }
+
+  body{
+    font-family:'Poppins', sans-serif;
+    background: radial-gradient(circle at 20% 20%, #E6F1FF 0%, var(--cream) 45%, var(--lavender) 100%);
+    color:var(--plum);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  .display{
+    font-family:'Baloo 2', cursive;
+  }
+
+  /* ambient floating shapes */
+  .bg-float{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+  .bg-float span{
+    position:absolute;
+    bottom:-60px;
+    font-size:28px;
+    opacity:0.55;
+    animation:floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    to{ transform: translateY(-115vh) rotate(20deg); opacity:0; }
+  }
+
+  .stage{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:520px;
+    padding:32px 20px;
+    text-align:center;
+  }
+
+  /* ---------- SCENE 1: ENVELOPE ---------- */
+  .scene{
+    display:none;
+    animation:fadeIn 0.6s ease both;
+  }
+  .scene.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  .prompt-text{
+    font-family:'Baloo 2', cursive;
+    font-size:22px;
+    font-weight:600;
+    color:var(--plum);
+    margin-bottom:36px;
+    letter-spacing:0.3px;
+  }
+
+  .envelope-zone{
+    position:relative;
+    width:260px;
+    height:180px;
+    margin:0 auto;
+    cursor:pointer;
+    perspective:1000px;
+  }
+
+  .envelope-body{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(160deg, var(--blue) 0%, var(--blue-deep) 100%);
+    border-radius:14px;
+    box-shadow: 0 18px 34px -12px rgba(110,168,255,0.55);
+    overflow:hidden;
+  }
+
+  .envelope-pocket-left,
+  .envelope-pocket-right{
+    position:absolute;
+    top:0;
+    width:0; height:0;
+    border-top: 90px solid rgba(255,255,255,0.18);
+  }
+  .envelope-pocket-left{
+    left:0;
+    border-right:130px solid transparent;
+  }
+  .envelope-pocket-right{
+    right:0;
+    border-left:130px solid transparent;
+  }
+
+  .letter-peek{
+    position:absolute;
+    left:50%;
+    bottom:6px;
+    transform:translateX(-50%);
+    width:210px;
+    height:130px;
+    background:var(--white);
+    border-radius:10px 10px 4px 4px;
+    box-shadow:0 -2px 10px rgba(0,0,0,0.06);
+    transition: transform 0.7s cubic-bezier(.2,.9,.3,1.2);
+    z-index:1;
+  }
+
+  .envelope-flap{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:0;
+    border-left:130px solid transparent;
+    border-right:130px solid transparent;
+    border-top:92px solid var(--blue-deep);
+    transform-origin:top center;
+    transition:transform 0.6s cubic-bezier(.3,.1,.2,1);
+    z-index:3;
+    filter:drop-shadow(0 6px 6px rgba(60,120,200,0.25));
+  }
+
+  .seal{
+    position:absolute;
+    top:78px;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:52px; height:52px;
+    background: radial-gradient(circle at 35% 30%, #8FBFFF, #558FE8 70%);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    z-index:4;
+    box-shadow:0 4px 10px rgba(40,90,180,0.45);
+    transition:transform 0.35s ease, opacity 0.35s ease;
+  }
+
+  .envelope-zone:hover .seal{ transform:translate(-50%,-50%) scale(1.08); }
+
+  .envelope-zone.open .envelope-flap{
+    transform:rotateX(180deg);
+  }
+  .envelope-zone.open .seal{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(0);
+  }
+  .envelope-zone.open .letter-peek{
+    transform:translateX(-50%) translateY(-58px);
+  }
+
+  .tap-hint{
+    margin-top:22px;
+    font-size:13px;
+    color:#7C9AB0;
+    letter-spacing:0.4px;
+  }
+
+  /* ---------- SCENE 2: LETTER ---------- */
+  .letter-card{
+    background:var(--white);
+    border-radius:22px;
+    padding:34px 28px 30px;
+    box-shadow:0 24px 50px -20px rgba(90,120,150,0.35);
+    position:relative;
+    text-align:left;
+  }
+  .letter-card::before{
+    content:"";
+    position:absolute;
+    top:14px; left:14px; right:14px; bottom:14px;
+    border:1.5px dashed #D9E8F4;
+    border-radius:14px;
+    pointer-events:none;
+  }
+  .letter-heading{
+    font-family:'Baloo 2', cursive;
+    font-size:26px;
+    font-weight:700;
+    color:#5588E8;
+    margin-bottom:14px;
+  }
+  .letter-body p{
+    font-size:14.5px;
+    line-height:1.85;
+    color:#4A5C63;
+    margin-bottom:14px;
+  }
+  .letter-sign{
+    font-family:'Baloo 2', cursive;
+    font-size:17px;
+    color:var(--plum);
+    text-align:right;
+    margin-top:6px;
+  }
+
+  .cta-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:22px;
+    padding:13px 26px;
+    border:none;
+    border-radius:100px;
+    background:linear-gradient(135deg, #9EC4FF, #8CB8FF);
+    color:#fff;
+    font-family:'Baloo 2', cursive;
+    font-size:15.5px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 12px 24px -8px rgba(130,160,255,0.6);
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .cta-btn:hover{ transform:translateY(-2px); box-shadow:0 16px 28px -8px rgba(130,160,255,0.7); }
+  .cta-btn:active{ transform:translateY(0px) scale(0.98); }
+
+  .scene-center{ text-align:center; }
+
+  /* ---------- SCENE 3: VIDEO ---------- */
+  .video-heading{
+    font-family:'Baloo 2', cursive;
+    font-size:24px;
+    font-weight:700;
+    color:#5588E8;
+    margin-bottom:6px;
+  }
+  .video-sub{
+    font-size:13.5px;
+    color:#7C9AB0;
+    margin-bottom:22px;
+  }
+
+  .frame{
+    background:var(--white);
+    padding:14px 14px 20px;
+    border-radius:20px;
+    box-shadow:0 24px 50px -18px rgba(90,120,150,0.4);
+    position:relative;
+    transform:rotate(-1.2deg);
+  }
+  .frame::before, .frame::after{
+    content:"";
+    position:absolute;
+    width:46px; height:16px;
+    background:rgba(214,232,255,0.85);
+    border:1px solid rgba(180,210,255,0.6);
+    top:-10px;
+  }
+  .frame::before{ left:22px; transform:rotate(-8deg); }
+  .frame::after{ right:22px; transform:rotate(6deg); }
+
+  video{
+    width:100%;
+    display:block;
+    border-radius:12px;
+    background:#000;
+  }
+
+  .caption{
+    margin-top:14px;
+    font-family:'Baloo 2', cursive;
+    font-size:16px;
+    color:var(--plum);
+  }
+
+  .replay-btn{
+    margin-top:20px;
+    background:none;
+    border:1.5px solid #B8CEE8;
+    color:#648EB0;
+    padding:9px 20px;
+    border-radius:100px;
+    font-family:'Poppins';
+    font-size:13px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .replay-btn:hover{ background:#F0F6FF; }
+
+  /* confetti */
+  .confetti-piece{
+    position:fixed;
+    top:-20px;
+    z-index:50;
+    pointer-events:none;
+    border-radius:2px;
+  }
+  @keyframes confettiFall{
+    to{ transform: translateY(110vh) rotate(540deg); opacity:0.9; }
+  }
+
+  @media (max-width:400px){
+    .envelope-zone{ width:220px; height:155px; }
+    .envelope-flap{ border-left:110px solid transparent; border-right:110px solid transparent; border-top:78px solid var(--blue-deep); }
+    .letter-peek{ width:180px; height:112px; }
+    .seal{ top:66px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-float" id="bgFloat"></div>
+
+<div class="stage">
+
+  <!-- SCENE 1 -->
+  <section class="scene active" id="scene1">
+    <div class="prompt-text">this is for you 💌</div>
+    <div class="envelope-zone" id="envelope" role="button" tabindex="0" aria-label="Buka amplop">
+      <div class="envelope-body">
+        <div class="envelope-pocket-left"></div>
+        <div class="envelope-pocket-right"></div>
+      </div>
+      <div class="letter-peek"></div>
+      <div class="envelope-flap"></div>
+      <div class="seal">♥</div>
+    </div>
+    <div class="tap-hint">ketuk amplopnya buat buka ✨</div>
+  </section>
+
+  <!-- SCENE 2 -->
+  <section class="scene" id="scene2">
+    <div class="letter-card">
+      <div class="letter-heading">Buat kamu, sayanggg</div>
+      <div class="letter-body">
+        <p>selamat ulang tahun,  sayangkuu </p>
+        <p>aku nyiapin sesuatu yang kecil, tapi dari hati banget. ga sabar liat reaksi kamu pas buka ini</p>
+        <p> klik tombol di bawah ya 👇</p>
+      </div>
+      <div class="scene-center">
+        <button class="cta-btn" id="toVideoBtn"> ayo buka 🎉</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 3 -->
+  <section class="scene" id="scene3">
+    <div class="video-heading">kejutan buat kamu 🎂</div>
+    <div class="video-sub">nyalain suara ya biar makin berasa~</div>
+    <div class="frame">
+      <video id="surpriseVideo" controls playsinline preload="metadata">
+        <source src="video.MOV" type="video/mp4">
+      </video>
+    </div>
+    <div class="caption"> kamu ga bisa beli ini dimanapun karna aku buat khusus buat kamu. aku pilih gunung karna aku suka pegunungan, maaf yaa kalau jelekk hehe. happy birthday, sayangku! 🥳💗</div>
+    <button class="replay-btn" id="replayBtn">Putar ulang</button>
+  </section>
+
+</div>
+
+<script>
+  // ambient floating emoji background
+  const emojis = ['🎈','💙','✨','🎉','💌','🌸'];
+  const bgFloat = document.getElementById('bgFloat');
+  for(let i=0;i<16;i++){
+    const el = document.createElement('span');
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.animationDuration = (9 + Math.random()*10) + 's';
+    el.style.animationDelay = (Math.random()*10) + 's';
+    el.style.fontSize = (18 + Math.random()*20) + 'px';
+    bgFloat.appendChild(el);
+  }
+
+  function showScene(id){
+    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function burstConfetti(count){
+    const colors = ['#9EC4FF','#66B2FF','#92B8E8','#B8D4FF','#8FD3C7'];
+    for(let i=0;i<count;i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const size = 6 + Math.random()*6;
+      piece.style.width = size + 'px';
+      piece.style.height = (size*0.4) + 'px';
+      piece.style.left = Math.random()*100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      piece.style.animation = `confettiFall ${2.5 + Math.random()*1.8}s ease-in forwards`;
+      piece.style.animationDelay = (Math.random()*0.4) + 's';
+      document.body.appendChild(piece);
+      setTimeout(()=> piece.remove(), 5000);
+    }
+  }
+
+  const envelope = document.getElementById('envelope');
+  function openEnvelope(){
+    if(envelope.classList.contains('open')) return;
+    envelope.classList.add('open');
+    burstConfetti(24);
+    setTimeout(()=> showScene('scene2'), 750);
+  }
+  envelope.addEventListener('click', openEnvelope);
+  envelope.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openEnvelope(); });
+
+  document.getElementById('toVideoBtn').addEventListener('click', ()=>{
+    showScene('scene3');
+    burstConfetti(40);
+    const v = document.getElementById('surpriseVideo');
+    setTimeout(()=> v.play().catch(()=>{}), 300);
+  });
+
+  document.getElementById('replayBtn').addEventListener('click', ()=>{
+    const v = document.getElementById('surpriseVideo');
+    v.currentTime = 0;
+    v.play().catch(()=>{});
+    burstConfetti(18);
+  });
+</script>
+
+</body>
+</html>
